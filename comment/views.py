@@ -48,7 +48,8 @@ def submit_comment(request,pk):
 
 
 def get_comments(request):
-    if not request.is_ajax():
+    #if not request.is_ajax():
+    if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return HttpResponseBadRequest()
     page = request.GET.get('page')
     page_size = request.GET.get('page_size')

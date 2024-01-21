@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'sorl.thumbnail',
-    'chunked_upload',
-    'video',
     'users',
+    'chunked_upload',
     'myadmin',
     'comment',
+    'video',
 ]
 
 MIDDLEWARE = [

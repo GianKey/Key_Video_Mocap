@@ -1,24 +1,4 @@
 
-CREATE TABLE `v_user` (
-`id` int NOT NULL AUTO_INCREMENT,
-`nickname` varchar(200) NOT NULL,
-`avatar` varchar(200) NOT NULL,
-`mobile` varchar(200) NOT NULL,
-`username` varchar(200) NOT NULL,
-`password` varchar(200) NOT NULL,
-`last_login` datetime(6) NOT NULL,
-`is_superuser` int DEFAULT NULL,
-`gender` int DEFAULT NULL,
-`subscribe` int DEFAULT NULL,
-`first_name` varchar(200) NOT NULL,
-`last_name` varchar(200) NOT NULL,
-`email` varchar(200) NOT NULL,
-`is_staff` int DEFAULT NULL,
-`is_active` int DEFAULT NULL,
-`date_joined` datetime(6) NOT NULL,
-PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
 
 alter table v_user modify column `last_login` datetime(6) ;
 alter table v_user modify column `nickname` varchar(200) ;
@@ -53,18 +33,9 @@ PRIMARY KEY (`id`)
   INSERT INTO v_video(title, `desc`, classification, file, cover) VALUES ("1", "1", "1", "1", "1");
 
 
-
-CREATE TABLE `v_feedback` (
-`id` int NOT NULL AUTO_INCREMENT,
-`contact` varchar(200) NOT NULL,
-`content` varchar(200) NOT NULL,
-`timestamp` varchar(200) NOT NULL,
-PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
 CREATE TABLE `v_comment` (
 `id` int NOT NULL AUTO_INCREMENT,
-`user` varchar(200) NOT NULL,
+`user_id` varchar(200) NOT NULL,
 `nickname` varchar(200) NOT NULL,
 `avatar` varchar(200) NOT NULL,
 `video_id` varchar(200) NOT NULL,
