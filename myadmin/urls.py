@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from ml.endpoints import views as mlviews
 
 app_name = 'myadmin'
 urlpatterns = [
@@ -43,4 +44,6 @@ urlpatterns = [
     # -----------------------用户反馈-------------------------
     path('feedback_list/', views.FeedbackListView.as_view(), name='feedback_list'),
     path('feedback_delete/', views.feedback_delete, name='feedback_delete'),
+
+    path('ml_list/',mlviews.IndexView.as_view(),name='ml_list'),
 ]

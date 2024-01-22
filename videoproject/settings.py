@@ -36,12 +36,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'rest_framework',  # add django rest framework
     'sorl.thumbnail',
     'users',
     'chunked_upload',
     'myadmin',
     'comment',
     'video',
+    'ml.endpoints',
+    'ml.mlModel'
 ]
 
 MIDDLEWARE = [

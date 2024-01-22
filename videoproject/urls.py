@@ -19,6 +19,9 @@ from django.contrib import admin
 from django.urls import include, path
 from video import views
 
+
+from ml.endpoints.urls import urlpatterns as endpoints_urlpatterns
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('video/',include('video.urls')),
@@ -28,3 +31,5 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='home'), # 默认首页
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += endpoints_urlpatterns
