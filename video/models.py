@@ -57,6 +57,7 @@ class Video(models.Model):
     #collected = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                   # blank=True, related_name="collected_videos")
     create_time = models.DateTimeField(auto_now_add=True, blank=True, max_length=20)
+    #mocap_res =  models.FileField(max_length=255,null=True)
 
     objects = VideoQuerySet.as_manager()
     class Meta:

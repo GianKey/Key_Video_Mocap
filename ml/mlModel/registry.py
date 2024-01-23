@@ -2,6 +2,10 @@ from ml.endpoints.models import Endpoint
 from ml.endpoints.models import MLAlgorithm
 from ml.endpoints.models import MLAlgorithmStatus
 
+from ml.VEndpoints.models import VEndpoint
+from ml.VEndpoints.models import VMLAlgorithm
+from ml.VEndpoints.models import VMLAlgorithmStatus
+
 class MLRegistry:
     def __init__(self):
         self.endpoints = {}
@@ -29,3 +33,32 @@ class MLRegistry:
 
         # add to registry
         self.endpoints[database_object.id] = algorithm_object
+
+class MMPoseRegistry:
+    def __init__(self):
+        self.endpoints = {}
+
+    def add_algorithm(self, endpoint_name, algorithm_object, algorithm_name,
+                    algorithm_status, algorithm_version, owner,
+                    algorithm_description, algorithm_code):
+        # get endpoint
+        endpoint, _ = VEndpoint.objects.get_or_create(name=endpoint_name, owner=owner)
+
+        # get algorithm
+        database_object, algorithm_created = VMLAlgorithm.objects.get_or_create(
+                name=algorithm_name,
+                description=algorithm_description,
+                code=algorithm_code,
+                version=algorithm_version,
+                owner=owner,
+                parent_endpoint=endpoint)
+        if algorithm_created:
+            status = VMLAlgorithmStatus(status = algorithm_status,
+                                        created_by = owner,
+                                        parent_mlalgorithm = database_object,
+                                        active = True)
+            status.save()
+
+        # add to registry
+        self.endpoints[database_object.id] = algorithm_object
+

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from ml.endpoints import views as mlviews
+
+from ml.VEndpoints import views as vmlviews
 
 app_name = 'myadmin'
 urlpatterns = [
@@ -28,6 +29,12 @@ urlpatterns = [
     path('classification_edit/<int:pk>/', views.ClassificationEditView.as_view(), name='classification_edit'),
     path('classification_delete/', views.classification_delete, name='classification_delete'),
 
+    # ----------------------算法管理----------------------------
+    path('VMLAlgorithm_list/', vmlviews.VMLAlgorithmListView.as_view(), name='vmlalgorithm_list'),
+    path('VMLAlgorithmStatusViewset/', vmlviews.VMLAlgorithmStatusViewSet.as_view({'get': 'list', 'post': 'create'}), name='vmlalgorithmstatus_list'),
+    path('VMLAlgorithmViewset/', vmlviews.VMLAlgorithmViewSet.as_view({'get': 'list'}), name='vmlalgorithmviewset'),
+    path('VMLAlgorithm_delete/', vmlviews.vmlalgorithm_delete, name='vmlalgorithm_delete'),
+
     #----------------------评论管理----------------------------
     path('comment_list/', views.CommentListView.as_view(), name='comment_list'),
     path('comment_delete/', views.comment_delete, name='comment_delete'),
@@ -44,6 +51,4 @@ urlpatterns = [
     # -----------------------用户反馈-------------------------
     path('feedback_list/', views.FeedbackListView.as_view(), name='feedback_list'),
     path('feedback_delete/', views.feedback_delete, name='feedback_delete'),
-
-    path('ml_list/',mlviews.IndexView.as_view(),name='ml_list'),
 ]

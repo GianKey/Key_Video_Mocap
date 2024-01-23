@@ -21,6 +21,8 @@ from video import views
 
 
 from ml.endpoints.urls import urlpatterns as endpoints_urlpatterns
+from ml.VEndpoints.urls import urlpatterns as VEndpoints_urlpatterns
+from ml.VEndpoints import urls as vmlurls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,8 +30,9 @@ urlpatterns = [
     path('myadmin/', include('myadmin.urls')),
     path('users/',include('users.urls')),
     path('comment/',include('comment.urls')),
+    path('vendpoints/',include('ml.VEndpoints.urls')),
     path('', views.IndexView.as_view(), name='home'), # 默认首页
+
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns += endpoints_urlpatterns

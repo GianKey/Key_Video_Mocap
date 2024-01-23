@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'comment',
     'video',
     'ml.endpoints',
-    'ml.mlModel'
+    'ml.VEndpoints',
+    'ml.mlModel',
 ]
 
 MIDDLEWARE = [

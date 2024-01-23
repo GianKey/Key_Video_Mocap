@@ -235,6 +235,7 @@ class CommentListView(AdminUserRequiredMixin, generic.ListView):
         return Comment.objects.filter(content__contains=self.q).order_by('-timestamp')
 
 
+
 @ajax_required
 @require_http_methods(["POST"])
 def comment_delete(request):
