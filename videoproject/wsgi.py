@@ -24,7 +24,7 @@ application = get_wsgi_application()
 import inspect
 from ml.mlModel.registry import MLRegistry,MMPoseRegistry
 from ml.mlModel.income_classifier.random_forest import RandomForestClassifier
-from ml.mlModel.mmpose.pose_inference.pose_inference import Body3dPoseEstimation
+from ml.mlModel.mmpose_ap.pose_inference.pose_inference import Body3dPoseEstimation
 
 try:
     registry = MLRegistry() # create ML registry
@@ -55,7 +55,7 @@ try:
                             algorithm_version="0.0.1",
                             owner="Key",
                             algorithm_description="pose inference for video",
-                            algorithm_code=inspect.getsource(RandomForestClassifier))
+                            algorithm_code=inspect.getsource(Body3dPoseEstimation))
 
 except Exception as e:
     print("Exception while loading the algorithms to the registry,", str(e))

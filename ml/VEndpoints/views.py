@@ -1,5 +1,7 @@
 import json
+import os
 from numpy.random import rand
+from urllib.parse import urlsplit
 
 from django.db import transaction
 from django.shortcuts import render
@@ -29,6 +31,8 @@ from helpers import get_page_list, ajax_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from ml.mlModel.registry import MLRegistry
+from videoproject.wsgi import  mmpose_registry
+from videoproject import  settings as globalsettings
 class VMLAlgorithmListView(AdminUserRequiredMixin, generic.ListView):
     model = VMLAlgorithm
     template_name = 'ml/vmlalgorithm_list.html'
@@ -174,4 +178,56 @@ class VMLRequestViewSet(
 #         prediction["request_id"] = ml_request.id
 #
 #         return Response(prediction)
-#
+
+class VPredictView(views.APIView):
+    def post(self, request, vendpoint_name,format=None):
+        algorithm_status = self.request.query_params.get("status", "production")
+        algorithm_version = self.request.query_params.get("version")
+
+        algs = VMLAlgorithm.objects.filter(parent_endpoint__name = vendpoint_name, status__status = algorithm_status, status__active=True)
+
+        if algorithm_version is not None:
+            algs = algs.filter(version = algorithm_version)
+
+        if len(algs) == 0:
+            return Response(
+                {"status": "Error", "message": "ML algorithm is not available"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(algs) != 1 and algorithm_status != "ab_testing":
+            return Response(
+                {"status": "Error", "message": "ML algorithm selection is ambiguous. Please specify algorithm version."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        alg_index = 0
+        if algorithm_status == "ab_testing":
+            alg_index = 0 if rand() < 0.5 else 1
+
+        algorithm_object = mmpose_registry.VMLAlgorithms[algs[alg_index].id]
+        inputvideopath = os.path.join(globalsettings.BASE_DIR,urlsplit(request.data['inputvideopath']).path[1:]).replace('\\', '/')
+        prediction = algorithm_object.pose_inference(inputvideopath)
+
+        res_json_data = json.loads(prediction)
+        pred_save_path =  f'{globalsettings.POSE_RESULT_PATH}/results_' \
+                              f'{os.path.splitext(os.path.basename(inputvideopath))[0]}.json'
+
+        if not os.path.exists(globalsettings.POSE_RESULT_PATH):
+            os.makedirs(globalsettings.POSE_RESULT_PATH)
+
+        with open(pred_save_path, 'w') as json_file:
+            json.dump(res_json_data, json_file, indent=4)
+
+       # label = prediction["label"] if "label" in prediction else "error"
+        ml_request = VMLRequest(
+            input_data=inputvideopath,
+            full_response=pred_save_path,
+            response=pred_save_path,
+            feedback="",
+            parent_mlalgorithm=algs[alg_index],
+        )
+        ml_request.save()
+
+        #prediction["request_id"] = ml_request.id
+
+        return Response(pred_save_path)
+

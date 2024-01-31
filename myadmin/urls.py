@@ -14,6 +14,7 @@ urlpatterns = [
     #----------------------视频管理------------------------
     path('video_list/', views.VideoListView.as_view(), name='video_list'),
     path('video_add/', views.AddVideoView.as_view(), name='video_add'),
+    path('out_video_add/', views.outAddVideoView.as_view(), name='out_video_add'),
 
     path('chunked_upload/',  views.MyChunkedUploadView.as_view(), name='api_chunked_upload'),
     path('chunked_upload_complete/', views.MyChunkedUploadCompleteView.as_view(),name='api_chunked_upload_complete'),

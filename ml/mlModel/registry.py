@@ -36,7 +36,7 @@ class MLRegistry:
 
 class MMPoseRegistry:
     def __init__(self):
-        self.endpoints = {}
+        self.VMLAlgorithms = {}
 
     def add_algorithm(self, endpoint_name, algorithm_object, algorithm_name,
                     algorithm_status, algorithm_version, owner,
@@ -60,5 +60,5 @@ class MMPoseRegistry:
             status.save()
 
         # add to registry
-        self.endpoints[database_object.id] = algorithm_object
+        self.VMLAlgorithms[database_object.id] = algorithm_object
 

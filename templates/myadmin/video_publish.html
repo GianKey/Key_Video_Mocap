@@ -37,6 +37,19 @@
                         </div>
                     </div>
                 </div>
+                <div class="field">
+                    <label>检测算法选择</label>
+                    <div class="ui selection  dropdown">
+                        {{ form.vmlalgorithm  }}
+                        <i class="dropdown icon"></i>
+                        <div class="default text">请选择</div>
+                        <div class="menu">
+                            {% for item in alg_list %}
+                            <div class="item" data-value="{{item.id}}">{{item.name}}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
                  {{form.status}}
                 <div class="field">
                     <label>视频封面</label>

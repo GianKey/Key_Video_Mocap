@@ -1,5 +1,4 @@
 from django.db import models
-from video.models import Video
 
 import datetime
 from django.conf import settings
@@ -78,10 +77,10 @@ class VMLRequest(models.Model):
         parent_mlalgorithm: The reference to MLAlgorithm used to
         					compute response.
     '''
-    input_data = models. file = models.FileField(max_length=255)
-    full_response = models.TextField(max_length=10000)
-    response = models.TextField(max_length=10000)
+    input_data =models.FileField(max_length=255)
+    full_response = models.TextField(max_length=10000,blank=True,verbose_name='结果',null=True)
+    #full_response = models.FileField(upload_to='results/',blank=True,verbose_name='结果',null=True)
+    response = models.TextField(max_length=10000,blank=True,null=True)
     feedback = models.TextField(max_length=10000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     parent_mlalgorithm = models.ForeignKey(VMLAlgorithm, on_delete=models.CASCADE)
-    related_Video = models.ForeignKey(Video,on_delete=models.CASCADE)

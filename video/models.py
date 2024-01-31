@@ -3,7 +3,13 @@ import os
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
+from ml.VEndpoints.models import VMLAlgorithm
+from django.http import JsonResponse
 
+def get_video_list(request):
+    videos = Video.objects.get_published_list()
+    video_list = [{'title': video.title, 'url': video.file.url} for video in videos]
+    return JsonResponse({'videos': video_list})
 
 class VideoQuerySet(models.query.QuerySet):
 
@@ -57,7 +63,8 @@ class Video(models.Model):
     #collected = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                   # blank=True, related_name="collected_videos")
     create_time = models.DateTimeField(auto_now_add=True, blank=True, max_length=20)
-    #mocap_res =  models.FileField(max_length=255,null=True)
+    mocap_res =  models.FileField(max_length=255,null=True)
+    vmlalgorithm = models.ForeignKey(VMLAlgorithm, on_delete=models.SET_NULL, null=True)
 
     objects = VideoQuerySet.as_manager()
     class Meta:
