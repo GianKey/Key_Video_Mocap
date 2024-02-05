@@ -205,7 +205,7 @@ class VPredictView(views.APIView):
 
         algorithm_object = mmpose_registry.VMLAlgorithms[algs[alg_index].id]
         inputvideopath = os.path.join(globalsettings.BASE_DIR,urlsplit(request.data['inputvideopath']).path[1:]).replace('\\', '/')
-        prediction = algorithm_object.pose_inference(inputvideopath)
+        prediction = algorithm_object.pose_inference(inputvideopath,globalsettings.POSE_RESULT_PATH)
 
         res_json_data = json.loads(prediction)
         pred_save_path =  f'{globalsettings.POSE_RESULT_PATH}/results_' \

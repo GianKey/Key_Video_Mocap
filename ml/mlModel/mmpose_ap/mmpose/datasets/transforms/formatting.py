@@ -98,7 +98,7 @@ class PackPoseInputs(BaseTransform):
         meta_keys (Sequence[str], optional): Meta keys which will be stored in
             :obj: `PoseDataSample` as meta info. Defaults to ``('id',
             'img_id', 'img_path', 'category_id', 'crowd_index, 'ori_shape',
-            'img_shape',, 'input_size', 'input_center', 'input_scale', 'flip',
+            'img_shape', 'input_size', 'input_center', 'input_scale', 'flip',
             'flip_direction', 'flip_indices', 'raw_ann_info')``
     """
 
@@ -108,7 +108,16 @@ class PackPoseInputs(BaseTransform):
         bbox='bboxes',
         bbox_score='bbox_scores',
         keypoints='keypoints',
-        keypoints_visible='keypoints_visible')
+        keypoints_cam='keypoints_cam',
+        keypoints_visible='keypoints_visible',
+        # In CocoMetric, the area of predicted instances will be calculated
+        # using gt_instances.bbox_scales. To unsure correspondence with
+        # previous version, this key is preserved here.
+        bbox_scale='bbox_scales',
+        # `head_size` is used for computing MpiiPCKAccuracy metric,
+        # namely, PCKh
+        head_size='head_size',
+    )
 
     # items in `field_mapping_table` will be packed into
     # PoseDataSample.gt_fields and converted to Tensor. These items will be
@@ -242,5 +251,6 @@ class PackPoseInputs(BaseTransform):
             str: Formatted string.
         """
         repr_str = self.__class__.__name__
-        repr_str += f'(meta_keys={self.meta_keys})'
+        repr_str += f'(meta_keys={self.meta_keys}, '
+        repr_str += f'pack_transformed={self.pack_transformed})'
         return repr_str

@@ -40,7 +40,7 @@ class MMPoseRegistry:
 
     def add_algorithm(self, endpoint_name, algorithm_object, algorithm_name,
                     algorithm_status, algorithm_version, owner,
-                    algorithm_description, algorithm_code):
+                    algorithm_description, algorithm_code,active):
         # get endpoint
         endpoint, _ = VEndpoint.objects.get_or_create(name=endpoint_name, owner=owner)
 
