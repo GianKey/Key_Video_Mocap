@@ -4,21 +4,22 @@ from .bvh_skeleton import h36m_skeleton,smartbody_skeleton
 def convertResH36m2bvh(prediction3d,viz_output):
     # 第三步：将预测的三维点从相机坐标系转换到世界坐标系
     # （1）第一种转换方法
-    rot = np.array([0.14070565, -0.15007018, -0.7552408, 0.62232804], dtype=np.float32)
-    prediction = camera_to_world(prediction3d, R=rot, t=0)
-    # We don't have the trajectory, but at least we can rebase the height将预测的三维点的Z值减去预测的三维点中Z的最小值，得到正向的Z值
-    prediction[:, :, 2] -= np.min(prediction[:, :, 2])
+    #rot = np.array([0.14070565, -0.15007018, -0.7552408, 0.62232804], dtype=np.float32)
+    # rot = np.array([0, 0, 0, 0], dtype=np.float32)
+    # prediction = camera_to_world(prediction3d, R=rot, t=0)
+    # # We don't have the trajectory, but at least we can rebase the height将预测的三维点的Z值减去预测的三维点中Z的最小值，得到正向的Z值
+    # prediction[:, :, 2] -= np.min(prediction[:, :, 2])
 
     # （2）第二种转换方法
-    # subject = 'S1'
-    # cam_id = '55011271'
-    # cam_params = load_camera_params('./camera/cameras.h5')[subject][cam_id]
-    # R = cam_params['R']
-    # T = 0
-    # azimuth = cam_params['azimuth']
-    #
-    # prediction = camera2world(pose=prediction, R=R, T=T)
-    # prediction[:, :, 2] -= np.min(prediction[:, :, 2])  # rebase the height
+    subject = 'S1'
+    cam_id = '55011271'
+    cam_params = load_camera_params('ml/mlModel/mmpose_ap/tools/cameras.h5')[subject][cam_id]
+    R = cam_params['R']
+    T = 0
+    azimuth = cam_params['azimuth']
+
+    prediction = camera2world(pose=prediction3d, R=R, T=T)
+    prediction[:, :, 2] -= (np.min(prediction[:, :, 2])) # rebase the height
 
     # 第四步：将3D关键点输出并将预测的3D点转换为bvh骨骼
     # 将三维预测点输出
@@ -27,7 +28,7 @@ def convertResH36m2bvh(prediction3d,viz_output):
     # 将预测的三维骨骼点转换为bvh骨骼
     prediction_copy = np.copy(prediction)
     write_standard_bvh(viz_output,prediction_copy) #转为标准bvh骨骼
-    write_smartbody_bvh(viz_output,prediction_copy) #转为SmartBody所需的bvh骨骼
+    #write_smartbody_bvh(viz_output,prediction_copy) #转为SmartBody所需的bvh骨骼
 
 def write_3d_point(outvideopath,prediction3dpoint):
     '''
@@ -50,17 +51,17 @@ def write_3d_point(outvideopath,prediction3dpoint):
         frameNum += 1
         for point3d in frame:
             # （1）转换成SmartBody和Meshlab的坐标系，Y轴向上，X向右，Z轴向前
-            # X = point3d[0]
-            # Y = point3d[1]
-            # Z = point3d[2]
-            #
-            # X_1 = -X
-            # Y_1 = Z
-            # Z_1 = Y
-            # str = '{},{},{}\n'.format(X_1, Y_1, Z_1)
+            X = point3d[0]
+            Y = point3d[1]
+            Z = point3d[2]
+
+            X_1 = -X
+            Y_1 = Z
+            Z_1 = Y
+            str = '{},{},{}\n'.format(X_1, Y_1, Z_1)
 
             #（2）未转换任何坐标系的输出，Z轴向上，X向右，Y向前
-            str = '{},{},{}\n'.format(point3d[0],point3d[1],point3d[2])
+            #str = '{},{},{}\n'.format(point3d[0],point3d[1],point3d[2])
             file.write(str)
         file.close()
 
