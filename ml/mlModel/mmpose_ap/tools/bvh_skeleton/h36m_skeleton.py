@@ -48,7 +48,7 @@ class H36mSkeleton(object):
             'Spine': ['Thorax'],
             'Thorax': ['Neck', 'LeftShoulder', 'RightShoulder'],
             'Neck': ['HeadEndSite'],
-            'HeadEndSite': [], # Head is an end site
+            'HeadEndSite': [],  # Head is an end site
             'LeftShoulder': ['LeftElbow'],
             'LeftElbow': ['LeftWrist'],
             'LeftWrist': ['LeftWristEndSite'],
@@ -63,7 +63,7 @@ class H36mSkeleton(object):
         for parent, children in self.children.items():
             for child in children:
                 self.parent[child] = parent
-                
+
         self.left_joints = [
             joint for joint in self.keypoint2index
             if 'Left' in joint
@@ -156,14 +156,13 @@ class H36mSkeleton(object):
             p_idx = self.keypoint2index[parent]
             for child in self.children[parent]:
                 if 'EndSite' in child:
-                    bone_lens[child] = 0.4 * bone_lens[parent] 
+                    bone_lens[child] = 0.4 * bone_lens[parent]
                     continue
                 stack.append(child)
 
                 c_idx = self.keypoint2index[child]
                 bone_lens[child] = np.linalg.norm(
-                    poses_3d[:, p_idx] -
-                    poses_3d[:, c_idx],
+                    poses_3d[:, p_idx] - poses_3d[:, c_idx],
                     axis=1
                 )
 
@@ -183,7 +182,6 @@ class H36mSkeleton(object):
             initial_offset[joint] = direction * bone_len[joint]
 
         return initial_offset
-
 
     def get_bvh_header(self, poses_3d):
         initial_offset = self.get_initial_offset(poses_3d)
@@ -207,7 +205,6 @@ class H36mSkeleton(object):
         header = bvh_helper.BvhHeader(root=nodes[self.root], nodes=nodes)
         return header
 
-
     def pose2euler(self, pose, header):
         channel = []
         quats = {}
@@ -217,7 +214,7 @@ class H36mSkeleton(object):
             node = stack.pop()
             joint = node.name
             joint_idx = self.keypoint2index[joint]
-            
+
             if node.is_root:
                 channel.extend(pose[joint_idx])
 
@@ -247,7 +244,7 @@ class H36mSkeleton(object):
                 order = 'zyx'
             elif joint == 'Thorax':
                 x_dir = pose[index['LeftShoulder']] - \
-                    pose[index['RightShoulder']]
+                        pose[index['RightShoulder']]
                 y_dir = None
                 z_dir = pose[joint_idx] - pose[index['Spine']]
                 order = 'zyx'
@@ -281,13 +278,13 @@ class H36mSkeleton(object):
                 quats[joint] = math3d.dcm2quat(dcm)
             else:
                 quats[joint] = quats[self.parent[joint]].copy()
-            
+
             local_quat = quats[joint].copy()
             if node.parent:
                 local_quat = math3d.quat_divide(
                     q=quats[joint], r=quats[node.parent.name]
                 )
-            
+
             euler = math3d.quat2euler(
                 q=local_quat, order=node.rotation_order
             )
@@ -487,8 +484,6 @@ class H36mSkeleton(object):
 
         return channel
 
-
-
     def poses2bvh(self, poses_3d, header=None, output_file=None):
         if not header:
             header = self.get_bvh_header(poses_3d)
@@ -496,10 +491,10 @@ class H36mSkeleton(object):
         channels = []
         for frame, pose in enumerate(poses_3d):
             channels.append(self.pose2euler(pose, header))
-            #channels.append(self.pose2euler_SmartBody(pose, header))
-            #channels.append(self.pose2euler_SmartBody_Modify(pose, header))
+            # channels.append(self.pose2euler_SmartBody(pose, header))
+            # channels.append(self.pose2euler_SmartBody_Modify(pose, header))
 
         if output_file:
             bvh_helper.write_bvh(output_file, header, channels)
-        
+
         return channels, header

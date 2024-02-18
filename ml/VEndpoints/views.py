@@ -33,6 +33,8 @@ from django.http import JsonResponse
 from ml.mlModel.registry import MLRegistry
 from videoproject.wsgi import  mmpose_registry
 from videoproject import  settings as globalsettings
+from video.models import Video
+
 class VMLAlgorithmListView(AdminUserRequiredMixin, generic.ListView):
     model = VMLAlgorithm
     template_name = 'ml/vmlalgorithm_list.html'
@@ -135,7 +137,9 @@ class VMLRequestViewSet(
     serializer_class = VMLRequestSerializer
     queryset = VMLRequest.objects.all()
 
-
+def get_item_by_id(item_id):
+    item = Video.objects.get(pk=item_id)
+    return item
 # class VPredictView(views.APIView):
 #     def post(self, request, endpoint_name, format=None):
 #
@@ -180,6 +184,7 @@ class VMLRequestViewSet(
 #         return Response(prediction)
 
 class VPredictView(views.APIView):
+
     def post(self, request, vendpoint_name,format=None):
         algorithm_status = self.request.query_params.get("status", "production")
         algorithm_version = self.request.query_params.get("version")
@@ -204,8 +209,15 @@ class VPredictView(views.APIView):
             alg_index = 0 if rand() < 0.5 else 1
 
         algorithm_object = mmpose_registry.VMLAlgorithms[algs[alg_index].id]
+
+        videoid = request.data['videoid']
+        videoitem = get_item_by_id(videoid)
+        # if videoitem.vmlres is not None:
+        #     return Response(videoitem.vmlres.response)
+
         inputvideopath = os.path.join(globalsettings.BASE_DIR,urlsplit(request.data['inputvideopath']).path[1:]).replace('\\', '/')
-        prediction = algorithm_object.pose_inference(inputvideopath,globalsettings.POSE_RESULT_PATH)
+        prediction,bvhfilepath = algorithm_object.pose_inference(inputvideopath,globalsettings.POSE_RESULT_PATH)
+        bvhfilepath=bvhfilepath.replace('\\', '/')
 
         res_json_data = json.loads(prediction)
         pred_save_path =  f'{globalsettings.POSE_RESULT_PATH}/results_' \
@@ -220,14 +232,15 @@ class VPredictView(views.APIView):
        # label = prediction["label"] if "label" in prediction else "error"
         ml_request = VMLRequest(
             input_data=inputvideopath,
-            full_response=pred_save_path,
-            response=pred_save_path,
+            full_response=bvhfilepath,
+            response=bvhfilepath,
             feedback="",
             parent_mlalgorithm=algs[alg_index],
         )
         ml_request.save()
+        videoitem.vmlres = ml_request
 
         #prediction["request_id"] = ml_request.id
 
-        return Response(pred_save_path)
+        return Response(bvhfilepath)
 

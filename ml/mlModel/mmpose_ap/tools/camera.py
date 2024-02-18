@@ -120,6 +120,7 @@ def load_camera_params(file):
             cam_params[f'S{s}'] = {}
             for _, params in f[f'subject{s}'].items():
                 name = params['Name']
+                #name = ''.join([chr(c) for c in name])
                 name = ''.join(
                     [chr(int(name[c])) for c in range(len(name))]
                 )

@@ -827,7 +827,7 @@ class Body3dVideoPoseEstimation:
             if video_writer:
                 video_writer.release()
 
-            convertResH36m2bvh(np.array(keypoints3Dpos),output_root)
+            bvhfilepath = convertResH36m2bvh(np.array(keypoints3Dpos),output_file)
 
 
 
@@ -840,4 +840,4 @@ class Body3dVideoPoseEstimation:
         #     args.save_predictions = False
         #     raise ValueError(
         #         f'file {os.path.basename(args.input)} has invalid format.')
-        return result_json
+        return result_json,bvhfilepath
