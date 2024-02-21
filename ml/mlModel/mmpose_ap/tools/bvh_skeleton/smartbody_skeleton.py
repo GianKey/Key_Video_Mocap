@@ -230,29 +230,29 @@ class SmartBodySkeleton(object):
                 order = 'yzx'
             elif joint == 'Neck':
                 x_dir = None
-                z_dir = pose[index['Spine3']] - pose[joint_idx]
+                z_dir = pose[joint_idx] - pose[index['Spine3']]
                 y_dir = pose[index['Head']] - pose[index['Spine3']]
                 order = 'yxz'
             elif joint == 'LeftArm':
                 x_dir = pose[index['LeftForeArm']] - pose[joint_idx]
-                y_dir = None
-                z_dir = pose[index['LeftForeArm']] - pose[index['LeftHand']]
-                order = 'xyz'
+                y_dir = pose[index['LeftForeArm']] - pose[index['LeftHand']]
+                z_dir = None
+                order = 'yzx'
             elif joint == 'LeftForeArm':
                 x_dir = pose[index['LeftHand']] - pose[joint_idx]
-                y_dir = None
-                z_dir = pose[joint_idx] - pose[index['LeftArm']]
-                order = 'xyz'
+                y_dir = pose[joint_idx] - pose[index['LeftArm']]
+                z_dir = None
+                order = 'yzx'
             elif joint == 'RightArm':
                 x_dir = pose[joint_idx] - pose[index['RightForeArm']]
-                y_dir = None
-                z_dir = pose[index['RightForeArm']] - pose[index['RightHand']]
-                order = 'xyz'
+                y_dir = pose[index['RightForeArm']] - pose[index['RightHand']]
+                z_dir = None
+                order = 'yzx'
             elif joint == 'RightForeArm':
                 x_dir = pose[joint_idx] - pose[index['RightHand']]
-                y_dir = None
-                z_dir = pose[joint_idx] - pose[index['RightArm']]
-                order = 'xyz'
+                y_dir = pose[joint_idx] - pose[index['RightArm']]
+                z_dir = None
+                order = 'yzx'
             if order:
                 dcm = math3d_SmartBody.dcm_from_axis(x_dir, y_dir, z_dir, order)
                 quats[joint] = math3d_SmartBody.dcm2quat(dcm)

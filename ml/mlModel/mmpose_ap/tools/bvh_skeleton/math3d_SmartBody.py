@@ -36,6 +36,16 @@ def dcm_from_axis(x_dir, y_dir, z_dir, order):
         axis[name[(idx2 + 1) % 3]], axis[name[(idx2 + 2) % 3]]
     ))
 
+    axis[order[0]] = normalize(np.cross(
+        axis[name[(idx0 + 1) % 3]], axis[name[(idx0 + 2) % 3]]
+    ))
+    # axis[order[1]] = normalize(np.cross(
+    #     axis[name[(idx1 + 1) % 3]], axis[name[(idx1 + 2) % 3]]
+    # ))
+    # axis[order[2]] = normalize(np.cross(
+    #     axis[name[(idx2 + 1) % 3]], axis[name[(idx2 + 2) % 3]]
+    # ))
+
     dcm = np.asarray([axis['x'], axis['y'], axis['z']])
 
     return dcm
@@ -132,7 +142,7 @@ def quat_divide(q, r):
     return quat_mul(quat_inverse(r), q)
 
 
-def quat2euler(q, order='zxy', eps=1e-8):
+def quat2euler(q, order='yzx', eps=1e-8):
     original_shape = list(q.shape)
     original_shape[-1] = 3
     q = np.reshape(q, [-1, 4])
@@ -147,6 +157,23 @@ def quat2euler(q, order='zxy', eps=1e-8):
         y = np.arctan2(2 * (q0 * q2 - q1 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         z = np.arctan2(2 * (q0 * q3 - q1 * q2), 1 - 2 * (q1 * q1 + q3 * q3))
         euler = np.stack([z, x, y], axis=1)
+    # if order == 'zxy':
+    #     x = np.arcsin(np.clip(2 * (-q0 * q1 + q2 * q3), -1 + eps, 1 - eps))
+    #     y = np.arctan2(2 * (-q0 * q2 - q1 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+    #     z = np.arctan2(2 * (-q0 * q3 - q1 * q2), 1 - 2 * (q1 * q1 + q3 * q3))
+    #     euler = np.stack([z, x, y], axis=1)
+    elif order == "yzx":
+        y = np.arcsin(np.clip(2 * (q0 * q2 - q3 * q1), -1 + eps, 1 - eps))
+        #y = np.arcsin(2 * (q0 * q2 - q3 * q1))
+        x = np.arctan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+        z = np.arctan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+        euler = np.stack([y, z, x], axis=1)
+    elif order == "xyz":
+        #y = np.arcsin(np.clip(2 * (q0 * q2 - q3 * q1), -1 + eps, 1 - eps))
+        y = np.arcsin(2 * (q0 * q2 - q3 * q1))
+        x = np.arctan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+        z = np.arctan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+        euler = np.stack([x.y,z], axis=1)
     else:
         raise ValueError('Not implemented')
 

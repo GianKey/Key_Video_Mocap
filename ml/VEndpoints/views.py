@@ -219,15 +219,15 @@ class VPredictView(views.APIView):
         prediction,bvhfilepath = algorithm_object.pose_inference(inputvideopath,globalsettings.POSE_RESULT_PATH)
         bvhfilepath=bvhfilepath.replace('\\', '/')
 
-        res_json_data = json.loads(prediction)
-        pred_save_path =  f'{globalsettings.POSE_RESULT_PATH}/results_' \
-                              f'{os.path.splitext(os.path.basename(inputvideopath))[0]}.json'
+        # res_json_data = json.loads(prediction)
+        # pred_save_path =  f'{globalsettings.POSE_RESULT_PATH}/results_' \
+        #                       f'{os.path.splitext(os.path.basename(inputvideopath))[0]}.json'
 
         if not os.path.exists(globalsettings.POSE_RESULT_PATH):
             os.makedirs(globalsettings.POSE_RESULT_PATH)
 
-        with open(pred_save_path, 'w') as json_file:
-            json.dump(res_json_data, json_file, indent=4)
+        # with open(pred_save_path, 'w') as json_file:
+        #     json.dump(res_json_data, json_file, indent=4)
 
        # label = prediction["label"] if "label" in prediction else "error"
         ml_request = VMLRequest(

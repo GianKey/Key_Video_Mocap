@@ -30,7 +30,7 @@ def write_header(writer, node, level):
         writer.write(f'{indent}ROOT {node.name}\n')
         channel_num = 6
     elif node.is_end_site:
-        writer.write(f'{indent}End Site\n')
+        writer.write(f'{indent}End Site {node.name}\n')
         channel_num = 0
     else:
         writer.write(f'{indent}JOINT {node.name}\n')

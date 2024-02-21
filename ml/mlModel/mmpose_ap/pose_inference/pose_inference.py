@@ -681,9 +681,7 @@ class Body3dVideoPoseEstimation:
 
             pred_instances = pose_lift_result.pred_instances
             keypoints = pred_instances.keypoints
-            keypoints3Dpos.append(
-                keypoints[0][0]
-            )
+
 
             keypoint_scores = pred_instances.keypoint_scores
             if keypoint_scores.ndim == 3:
@@ -693,17 +691,22 @@ class Body3dVideoPoseEstimation:
             if keypoints.ndim == 4:
                 keypoints = np.squeeze(keypoints, axis=1)
 
-            keypoints = keypoints[..., [0, 2, 1]]
-            keypoints[..., 0] = -keypoints[..., 0]
-            keypoints[..., 2] = -keypoints[..., 2]
-
-            # rebase height (z-axis)
-            if not self.disable_rebase_keypoint:
-                keypoints[..., 2] -= np.min(
-                    keypoints[..., 2], axis=-1, keepdims=True)
+            # keypoints3Dpos.append(
+            #     keypoints[0]
+            # )
+            # keypoints = keypoints[..., [0, 2, 1]]
+            # keypoints[..., 0] = -keypoints[..., 0]
+            # keypoints[..., 2] = -keypoints[..., 2]
+            #
+            # # rebase height (z-axis)
+            # if not self.disable_rebase_keypoint:
+            #     keypoints[..., 2] -= np.min(
+            #         keypoints[..., 2], axis=-1, keepdims=True)
 
             pose_lift_results[idx].pred_instances.keypoints = keypoints
-
+            # keypoints3Dpos.append(
+            #     keypoints[0]
+            # )
 
         pose_lift_results = sorted(
             pose_lift_results, key=lambda x: x.get('track_id', 1e4))
@@ -712,24 +715,30 @@ class Body3dVideoPoseEstimation:
         det_data_sample = merge_data_samples(pose_est_results)
         pred_3d_instances = pred_3d_data_samples.get('pred_instances', None)
 
+        for idx, pred_3d_instance in enumerate(pred_3d_instances):
+            keypoints = pred_3d_instance.keypoints
+            keypoints3Dpos.append(
+                keypoints[0]
+            )
+
         if self.num_instances < 0:
             self.num_instances = len(pose_lift_results)
 
         # Visualization
-        if visualizer is not None:
-            visualizer.add_datasample(
-                'result',
-                visualize_frame,
-                data_sample=pred_3d_data_samples,
-                det_data_sample=det_data_sample,
-                draw_gt=False,
-                dataset_2d=pose_det_dataset_name,
-                dataset_3d=pose_lift_dataset_name,
-                show=self.show,
-                draw_bbox=True,
-                kpt_thr=self.kpt_thr,
-                num_instances=self.num_instances,
-                wait_time=self.show_interval)
+        # if visualizer is not None:
+        #     visualizer.add_datasample(
+        #         'result',
+        #         visualize_frame,
+        #         data_sample=pred_3d_data_samples,
+        #         det_data_sample=det_data_sample,
+        #         draw_gt=False,
+        #         dataset_2d=pose_det_dataset_name,
+        #         dataset_3d=pose_lift_dataset_name,
+        #         show=self.show,
+        #         draw_bbox=True,
+        #         kpt_thr=self.kpt_thr,
+        #         num_instances=self.num_instances,
+        #         wait_time=self.show_interval)
 
         return pose_est_results, pose_est_results_list, pred_3d_instances, next_id
 
@@ -805,16 +814,16 @@ class Body3dVideoPoseEstimation:
 
 
 
-                if save_output:
-                    frame_vis = visualizer.get_image()
-                    if video_writer is None:
-                        # the size of the image with visualization may vary
-                        # depending on the presence of heatmaps
-                        video_writer = cv2.VideoWriter(output_file, fourcc, fps,
-                                                           (frame_vis.shape[1],
-                                                            frame_vis.shape[0]))
-
-                    video_writer.write(mmcv.rgb2bgr(frame_vis))
+                # if save_output:
+                #     frame_vis = visualizer.get_image()
+                #     if video_writer is None:
+                #         # the size of the image with visualization may vary
+                #         # depending on the presence of heatmaps
+                #         video_writer = cv2.VideoWriter(output_file, fourcc, fps,
+                #                                            (frame_vis.shape[1],
+                #                                             frame_vis.shape[0]))
+                #
+                #     video_writer.write(mmcv.rgb2bgr(frame_vis))
 
                 # if self.show:
                 #     # press ESC to exit
@@ -829,13 +838,12 @@ class Body3dVideoPoseEstimation:
 
             bvhfilepath = convertResH36m2bvh(np.array(keypoints3Dpos),output_file)
 
-
-
-        result_json  = json.dumps(
-                dict(
-                    meta_info=pose_lifter.dataset_meta,
-                    instance_info=pred_instances_list))
-               # indent='\t')
+        result_json = 0
+        # result_json  = json.dumps(
+        #         dict(
+        #             meta_info=pose_lifter.dataset_meta,
+        #             instance_info=pred_instances_list))
+        #        # indent='\t')
         # else:
         #     args.save_predictions = False
         #     raise ValueError(
