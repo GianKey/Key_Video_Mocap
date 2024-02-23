@@ -1,6 +1,42 @@
 from .camera import  *
 import  os
 from .bvh_skeleton import h36m_skeleton,smartbody_skeleton
+import pickle
+import numpy as np
+
+def rotationAddRoll(R,roll_to_add):
+     # 要添加的 roll 轴旋转角度，单位为度
+
+    # 将旋转矩阵 R 分解为欧拉角
+    roll, pitch, yaw = np.degrees(np.arctan2(R[2, 1], R[2, 2])), np.degrees(
+        np.arctan2(-R[2, 0], np.sqrt(R[2, 1] ** 2 + R[2, 2] ** 2))), np.degrees(np.arctan2(R[1, 0], R[0, 0]))
+
+    # 将 roll 轴的旋转角度加到当前的 roll 角度上
+    yaw += roll_to_add
+
+    # 限制 roll 角度的范围在 -180 到 180 度之间
+    yaw = (roll + 180) % 360 - 180
+
+    # 使用更新后的欧拉角重新构造旋转矩阵
+    roll_rad, pitch_rad, yaw_rad = np.radians(roll), np.radians(pitch), np.radians(yaw)
+     # 构造绕 Z 轴的旋转矩阵
+    R_x = np.array([[np.cos(yaw_rad), -np.sin(yaw_rad), 0],
+                     [np.sin(yaw_rad), np.cos(yaw_rad), 0],
+                     [0, 0, 1]])
+
+     # 构造绕 Y 轴的旋转矩阵
+    R_z = np.array([[np.cos(pitch_rad), 0, np.sin(pitch_rad)],
+                     [0, 1, 0],
+                     [-np.sin(pitch_rad), 0, np.cos(pitch_rad)]])
+
+     # 构造绕 X 轴的旋转矩阵
+    R_y = np.array([[1, 0, 0],
+                     [0, np.cos(roll_rad), -np.sin(roll_rad)],
+                     [0, np.sin(roll_rad), np.cos(roll_rad)]])
+
+     # 将每个旋转矩阵相乘以获得最终的旋转矩阵
+    R_adjusted = np.dot(R_z, np.dot(R_y, R_x))
+    return R_adjusted
 def convertResH36m2bvh(prediction3d,viz_output):
     # 第三步：将预测的三维点从相机坐标系转换到世界坐标系
     # （1）第一种转换方法
@@ -12,14 +48,29 @@ def convertResH36m2bvh(prediction3d,viz_output):
     # prediction[:, :, 2] -= np.min(prediction[:, :, 2])
 
     # （2）第二种转换方法
-    subject = 'S1'
+    subject = 'S9'
     cam_id = '55011271'
-    cam_params = load_camera_params('ml/mlModel/mmpose_ap/tools/cameras.h5')[subject][cam_id]
+    #cam_params = load_camera_params('ml/mlModel/mmpose_ap/tools/cameras.h5')[subject][cam_id]
+    cam_params = load_camera_params_pkl('D:/AI/Datasets/h36m/human36m/processed/annotation_body3d/cameras.pkl')[subject,cam_id]
     R = cam_params['R']
-    T = 0
-    azimuth = cam_params['azimuth']
+    T = cam_params['T']/cam_params['w']
+    #azimuth = cam_params['azimuth']
+    azimuth = {
+        '54138969': 70, '55011271': -0.4, '58860488': 110, '60457274': -100
+    }
+    R_x = np.array([[np.cos(azimuth[cam_id]), -np.sin(azimuth[cam_id]), 0],
+                    [np.sin(azimuth[cam_id]), np.cos(azimuth[cam_id]), 0],
+                    [0, 0, 1]])
 
-    prediction = camera2world(pose=prediction3d, R=R, T=T)
+    R_y = np.array([[1, 0, 0],
+                    [0, np.cos(azimuth[cam_id]), -np.sin(azimuth[cam_id])],
+                    [0, np.sin(azimuth[cam_id]), np.cos(azimuth[cam_id])]])
+    R_z = np.array([[np.cos(azimuth[cam_id]), 0, np.sin(azimuth[cam_id])],
+                    [0, 1, 0],
+                    [-np.sin(azimuth[cam_id]), 0, np.cos(azimuth[cam_id])]])
+    R_adjusted = np.dot(R_x ,R)    #rotationAddRoll(R,70)
+
+    prediction = camera2world(pose=prediction3d, R=R_adjusted, T=T)
     prediction[:, :, 2] -= (np.min(prediction[:, :, 2])) # rebase the height
 
     # 第四步：将3D关键点输出并将预测的3D点转换为bvh骨骼

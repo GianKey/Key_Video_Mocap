@@ -12,6 +12,7 @@ from .quaternion import qrot, qinverse
 from .utils import wrap
 import h5py
 from pathlib import Path
+import pickle
 
 
 def normalize_screen_coordinates(X, w, h):
@@ -135,6 +136,11 @@ def load_camera_params(file):
                 cam_params[f'S{s}'][name] = val
 
     return cam_params
+
+def load_camera_params_pkl(file):
+    f = open(file, 'rb')
+    data = pickle.load(f)
+    return data
 
 # added by HuangWang
 def camera2world(pose, R, T):

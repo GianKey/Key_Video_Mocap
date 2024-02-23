@@ -342,7 +342,7 @@ import numpy as np
 if __name__ == '__main__':
 
 
-    f = open('D:/BaiduNetdiskDownload/h36m_validation.pkl', 'rb')
+    f = open('D:/AI/Datasets/h36m/human36m/processed/annotation_body3d/cameras.pkl', 'rb')
     data = pickle.load(f)
     print(data)
     #main()
