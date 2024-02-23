@@ -39,12 +39,12 @@ def dcm_from_axis(x_dir, y_dir, z_dir, order):
     axis[order[0]] = normalize(np.cross(
         axis[name[(idx0 + 1) % 3]], axis[name[(idx0 + 2) % 3]]
     ))
-    # axis[order[1]] = normalize(np.cross(
-    #     axis[name[(idx1 + 1) % 3]], axis[name[(idx1 + 2) % 3]]
-    # ))
-    # axis[order[2]] = normalize(np.cross(
-    #     axis[name[(idx2 + 1) % 3]], axis[name[(idx2 + 2) % 3]]
-    # ))
+    axis[order[1]] = normalize(np.cross(
+        axis[name[(idx1 + 1) % 3]], axis[name[(idx1 + 2) % 3]]
+    ))
+    axis[order[2]] = normalize(np.cross(
+        axis[name[(idx2 + 1) % 3]], axis[name[(idx2 + 2) % 3]]
+    ))
 
     dcm = np.asarray([axis['x'], axis['y'], axis['z']])
 
@@ -173,7 +173,7 @@ def quat2euler(q, order='yzx', eps=1e-8):
         y = np.arcsin(2 * (q0 * q2 - q3 * q1))
         x = np.arctan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         z = np.arctan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
-        euler = np.stack([x.y,z], axis=1)
+        euler = np.stack([x,y,z], axis=1)
     else:
         raise ValueError('Not implemented')
 

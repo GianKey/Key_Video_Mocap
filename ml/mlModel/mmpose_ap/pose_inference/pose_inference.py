@@ -22,6 +22,14 @@ from mmpose.structures import (PoseDataSample, merge_data_samples,
                                split_instances)
 from mmpose.utils import adapt_mmdet_pipeline
 from ..tools.convert2bvh import convertResH36m2bvh
+from .Human3DPose_Utils import (display_model_aliases,
+                                collect_multi_frames,get_bbox,get_pose_lift_results,
+                                get_pose_est_results, smoother_pose)
+from mmpose.apis.inferencers import  get_model_aliases
+from .mmpose_inferencer_key import  MMPoseInferencerKey
+from ..tools.skeleton_fitting.ik2bvh import convertResPose_H36m2bvh
+from typing import List, Optional,Union
+from mmengine.infer.infer import ModelType
 
 try:
     from mmdet.apis import inference_detector, init_detector
@@ -446,11 +454,11 @@ class Body3dVideoPoseEstimation:
         self.save_predictions = True
         self.bbox_thr = 0.9
         self.kpt_thr = 0.3
-        self.tracking_thr = 0.2
+        self.tracking_thr = 0.3
         self.show_interval = 0
         self.thickness = 4
         self.radius = 3
-        self.online = False
+        self.online = True
         self.use_oks_tracking = True
         self.det_cat_id = 0
         self.disable_rebase_keypoint = True
@@ -694,14 +702,14 @@ class Body3dVideoPoseEstimation:
             # keypoints3Dpos.append(
             #     keypoints[0]
             # )
-            # keypoints = keypoints[..., [0, 2, 1]]
-            # keypoints[..., 0] = -keypoints[..., 0]
-            # keypoints[..., 2] = -keypoints[..., 2]
-            #
-            # # rebase height (z-axis)
-            # if not self.disable_rebase_keypoint:
-            #     keypoints[..., 2] -= np.min(
-            #         keypoints[..., 2], axis=-1, keepdims=True)
+            keypoints = keypoints[..., [0, 2, 1]]
+            keypoints[..., 0] = -keypoints[..., 0]
+            keypoints[..., 2] = -keypoints[..., 2]
+
+            # rebase height (z-axis)
+            if not self.disable_rebase_keypoint:
+                keypoints[..., 2] -= np.min(
+                    keypoints[..., 2], axis=-1, keepdims=True)
 
             pose_lift_results[idx].pred_instances.keypoints = keypoints
             # keypoints3Dpos.append(
@@ -837,6 +845,7 @@ class Body3dVideoPoseEstimation:
                 video_writer.release()
 
             bvhfilepath = convertResH36m2bvh(np.array(keypoints3Dpos),output_file)
+            convertResPose_H36m2bvh(np.array(keypoints3Dpos),output_file)
 
         result_json = 0
         # result_json  = json.dumps(
@@ -849,3 +858,104 @@ class Body3dVideoPoseEstimation:
         #     raise ValueError(
         #         f'file {os.path.basename(args.input)} has invalid format.')
         return result_json,bvhfilepath
+
+class Human3D_motionbert:
+    def __init__(self):
+       #path_to_mmpose = "../../mmpose_ap"
+        filter_args = dict(bbox_thr=0.3, nms_thr=0.3, pose_based_nms=False)
+        POSE2D_SPECIFIC_ARGS = dict(
+           yoloxpose=dict(bbox_thr=0.01, nms_thr=0.65, pose_based_nms=True),
+           rtmo=dict(bbox_thr=0.1, nms_thr=0.65, pose_based_nms=True),
+        )
+
+        self.call_args = {}
+
+        self.pose2d=None
+        self.pose2d_weights=None
+        self.pose3d_weights=None
+        self.pose3d='human3d'
+        self.det_model = None
+        self.det_weights = None
+        self.det_cat_ids = 0
+        self.scope = 'mmpose'
+        self.show_progress=True
+        self.device = "cuda:0"
+
+        self.display_alias = True
+
+        self.num_instances = 1
+        # for model in self.POSE2D_SPECIFIC_ARGS:
+        #     if model in self.pose2d:
+        #         filter_args.update(POSE2D_SPECIFIC_ARGS[model])
+        #         break
+        self.call_args['bbox_thr'] = filter_args['bbox_thr']
+        self.call_args['nms_thr'] = filter_args['nms_thr']
+        self.call_args['pose_based_nms'] = filter_args['pose_based_nms']
+        self.call_args['kpt_thr'] = 0.3
+        self.call_args['tracking_thr'] = 0.3
+        self.call_args['use_oks_tracking'] = True
+        self.call_args['disable_norm_pose_2d'] = False
+        self.call_args['disable_rebase_keypoint'] = False
+        self.call_args['thickness'] = 1
+        self.call_args['radius'] = 3
+        self.call_args['skeleton_style'] = 'mmpose'
+        self.call_args['black_background'] = False
+        self.call_args['show_alias'] = True
+        self.call_args['inputs'] = ''
+        self.call_args['vis_out_dir'] = 'pose_result/vis_results/human3d'
+        self.call_args['pred_out_dir'] = ''
+
+
+
+    def prepare_model(self):
+        if self.display_alias:
+            model_alises = get_model_aliases(self.scope)
+            display_model_aliases(model_alises)
+        # else:
+        inferencer = MMPoseInferencerKey(
+                 pose2d = self.pose2d,
+                 pose2d_weights = self.pose2d_weights,
+                 pose3d = self.pose3d,
+                 pose3d_weights = self.pose3d_weights,
+                 device = self.device,
+                 scope = self.scope,
+                 det_model = self.det_model,
+                 det_weights  = self.det_weights,
+                 det_cat_ids = self.det_cat_ids,
+                 show_progress = self.show_progress)
+        return inferencer
+    #def pose_inference(self,input,output_root):
+    def pose_inference(self,input,output_root):
+        output_file = os.path.join(output_root, os.path.basename(input))
+        keypoints3Dpos = []
+        self.call_args['inputs'] = input
+        inferencer = self.prepare_model()
+        for res in inferencer(**self.call_args):
+            predictions = res['predictions'][0][0]['keypoints']
+            pred_array  = np.array(predictions).reshape((17, 3))
+            thorax = (pred_array[11,:] + pred_array[14, :]) * 0.5
+            thorax = thorax.reshape((1, thorax.shape[0]))
+            pred_array = np.concatenate((pred_array, thorax), axis=0)
+            keypoints3Dpos.append(pred_array)
+        smoothed_preds = smoother_pose(keypoints3Dpos)
+        smooth_kpts = []
+        for res in smoothed_preds:
+            predictions = res[0]['keypoints']
+            pred_array = np.array(predictions).reshape((18, 3))
+            smooth_kpts.append(pred_array)
+        bvhfilepath = convertResH36m2bvh(np.array(smooth_kpts), output_file)
+        #bvhfilepath = convertResH36m2bvh(np.array(keypoints3Dpos), output_file)
+        #convertResPose_H36m2bvh(np.array(keypoints3Dpos), output_file)
+
+        result_json = 0
+        # result_json  = json.dumps(
+        #         dict(
+        #             meta_info=pose_lifter.dataset_meta,
+        #             instance_info=pred_instances_list))
+        #        # indent='\t')
+        # else:
+        #     args.save_predictions = False
+        #     raise ValueError(
+        #         f'file {os.path.basename(args.input)} has invalid format.')
+        return result_json,bvhfilepath
+

@@ -147,6 +147,12 @@ def quat2euler(q, order='zxy', eps=1e-8):
         y = np.arctan2(2 * (q0 * q2 - q1 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
         z = np.arctan2(2 * (q0 * q3 - q1 * q2), 1 - 2 * (q1 * q1 + q3 * q3))
         euler = np.stack([z, x, y], axis=1)
+    elif order == "xyz":
+        # y = np.arcsin(np.clip(2 * (q0 * q2 - q3 * q1), -1 + eps, 1 - eps))
+        y = np.arcsin(2 * (q0 * q2 - q3 * q1))
+        x = np.arctan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+        z = np.arctan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+        euler = np.stack([x, y, z], axis=1)
     else:
         raise ValueError('Not implemented')
 

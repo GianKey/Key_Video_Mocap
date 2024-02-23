@@ -24,7 +24,7 @@ application = get_wsgi_application()
 import inspect
 from ml.mlModel.registry import MLRegistry,MMPoseRegistry
 from ml.mlModel.income_classifier.random_forest import RandomForestClassifier
-from ml.mlModel.mmpose_ap.pose_inference.pose_inference import Body3dPoseEstimation,Body3dVideoPoseEstimation
+from ml.mlModel.mmpose_ap.pose_inference.pose_inference import Body3dPoseEstimation,Human3D_motionbert,Body3dVideoPoseEstimation
 
 try:
     registry = MLRegistry() # create ML registry
@@ -64,16 +64,16 @@ except Exception as e:
 
 try:
     mmpose_registry = MMPoseRegistry() # create ML registry
-    pi = Body3dVideoPoseEstimation()
+    pi = Human3D_motionbert()
     # add to ML registry
     mmpose_registry.add_algorithm(endpoint_name="video_mocap",
                             algorithm_object=pi,
-                            algorithm_name="Body3dVideoPoseEstimation",
+                            algorithm_name="Human3D_motionbert",
                             algorithm_status="production",
                             algorithm_version="0.0.1",
                             owner="Key",
                             algorithm_description="pose inference for video",
-                            algorithm_code=inspect.getsource(Body3dPoseEstimation),
+                            algorithm_code=inspect.getsource(Human3D_motionbert),
                             active = True
     )
 
