@@ -334,6 +334,11 @@ class H36mSkeleton(object):
                 #z_dir = -z_dir
                 #y_dir = -y_dir
                 order = 'yxz'
+            # elif joint == 'Neck':
+            #     x_dir = None
+            #     z_dir = pose[index['Nose']] - pose[joint_idx]
+            #     y_dir = pose[index['Head']] - pose[index['Neck']]
+            #     order = 'yxz'
             elif joint == 'LeftShoulder':
                 x_dir = pose[index['LeftElbow']] - pose[joint_idx]
                 z_dir = pose[index['LeftElbow']] - pose[index['LeftWrist']]

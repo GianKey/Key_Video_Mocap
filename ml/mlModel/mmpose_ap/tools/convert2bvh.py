@@ -56,7 +56,7 @@ def convertResH36m2bvh(prediction3d,viz_output):
     T = cam_params['T']/cam_params['w']
     #azimuth = cam_params['azimuth']
     azimuth = {
-        '54138969': 70, '55011271': -0.4, '58860488': 110, '60457274': -100
+        '54138969': 70, '55011271': -0.35, '58860488': 110, '60457274': -100
     }
     R_x = np.array([[np.cos(azimuth[cam_id]), -np.sin(azimuth[cam_id]), 0],
                     [np.sin(azimuth[cam_id]), np.cos(azimuth[cam_id]), 0],
