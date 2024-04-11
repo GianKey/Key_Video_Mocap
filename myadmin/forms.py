@@ -53,7 +53,7 @@ class VideoPublishForm(forms.ModelForm):
                              widget=forms.HiddenInput(attrs={'value':'0'}))
     class Meta:
         model = Video
-        fields = ['title', 'desc','status', 'cover', 'classification']
+        fields = ['title', 'desc','status', 'cover', 'classification','vmlalgorithm']
 
 
 class VideoEditForm(forms.ModelForm):
@@ -79,6 +79,7 @@ class VideoEditForm(forms.ModelForm):
 
     status = forms.CharField(min_length=1,max_length=1,required=False,
                              widget=forms.HiddenInput())
+
 
     # classification = forms.ModelChoiceField(queryset=Classification.objects.all())
     # classification = forms.CharField(min_length=1,max_length=1,required=False,

@@ -27,6 +27,8 @@ CREATE TABLE `v_video` (
 `liked` int DEFAULT NULL,
 `collected` int DEFAULT NULL,
 `create_time` datetime(6) DEFAULT NULL,
+`mocap_res`varchar(200) DEFAULT NULL,
+`vmlalgorithm` varchar(200) DEFAULT NULL,
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 

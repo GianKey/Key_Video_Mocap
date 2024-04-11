@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+from ml.VEndpoints import views as vmlviews
+
 app_name = 'myadmin'
 urlpatterns = [
     path('login/', views.login, name='login'),
@@ -12,6 +14,7 @@ urlpatterns = [
     #----------------------视频管理------------------------
     path('video_list/', views.VideoListView.as_view(), name='video_list'),
     path('video_add/', views.AddVideoView.as_view(), name='video_add'),
+    path('out_video_add/', views.outAddVideoView.as_view(), name='out_video_add'),
 
     path('chunked_upload/',  views.MyChunkedUploadView.as_view(), name='api_chunked_upload'),
     path('chunked_upload_complete/', views.MyChunkedUploadCompleteView.as_view(),name='api_chunked_upload_complete'),
@@ -26,6 +29,12 @@ urlpatterns = [
     path('classification_list/', views.ClassificationListView.as_view(), name='classification_list'),
     path('classification_edit/<int:pk>/', views.ClassificationEditView.as_view(), name='classification_edit'),
     path('classification_delete/', views.classification_delete, name='classification_delete'),
+
+    # ----------------------算法管理----------------------------
+    path('VMLAlgorithm_list/', vmlviews.VMLAlgorithmListView.as_view(), name='vmlalgorithm_list'),
+    path('VMLAlgorithmStatusViewset/', vmlviews.VMLAlgorithmStatusViewSet.as_view({'get': 'list', 'post': 'create'}), name='vmlalgorithmstatus_list'),
+    path('VMLAlgorithmViewset/', vmlviews.VMLAlgorithmViewSet.as_view({'get': 'list'}), name='vmlalgorithmviewset'),
+    path('VMLAlgorithm_delete/', vmlviews.vmlalgorithm_delete, name='vmlalgorithm_delete'),
 
     #----------------------评论管理----------------------------
     path('comment_list/', views.CommentListView.as_view(), name='comment_list'),

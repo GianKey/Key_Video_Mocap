@@ -20,9 +20,12 @@ from video.models import Video, Classification
 from .forms import UserLoginForm, VideoPublishForm, VideoEditForm, UserAddForm, UserEditForm, ClassificationAddForm, \
     ClassificationEditForm
 from .models import MyChunkedUpload
-
+from ml.VEndpoints.models import VMLAlgorithm,VMLRequest
+import json
+from django.core.files.base import ContentFile
+from videoproject.wsgi import mmpose_registry
 logger = logging.getLogger('my_logger')
-
+from chunked_upload.models import ChunkedUpload
 def login(request):
     if request.method == 'POST':
         form = UserLoginForm(request=request, data=request.POST)
@@ -71,7 +74,8 @@ class IndexView(AdminUserRequiredMixin, generic.View):
 
 class AddVideoView(SuperUserRequiredMixin, TemplateView):
     template_name = 'myadmin/video_add.html'
-
+class outAddVideoView( TemplateView):
+    template_name = 'myadmin/video_add.html'
 
 class MyChunkedUploadView(ChunkedUploadView):
     model = MyChunkedUpload
@@ -100,6 +104,11 @@ class VideoPublishView(SuperUserRequiredMixin, generic.UpdateView):
         clf_list = Classification.objects.all().values()
         clf_data = {'clf_list':clf_list}
         context.update(clf_data)
+
+
+        alg_list = VMLAlgorithm.objects.all().values()
+        alg_data = {'alg_list': alg_list}
+        context.update(alg_data)
         return context
 
     def get_success_url(self):
@@ -119,6 +128,10 @@ class VideoEditView(SuperUserRequiredMixin, generic.UpdateView):
         context = super(VideoEditView, self).get_context_data(**kwargs)
         clf_list = Classification.objects.all().values()
         clf_data = {'clf_list':clf_list}
+
+        alg_list = VMLAlgorithm.objects.all().values()
+        alg_data = {'alg_list': alg_list}
+        context.update(alg_data)
         context.update(clf_data)
         return context
 
@@ -157,6 +170,9 @@ class VideoListView(AdminUserRequiredMixin, generic.ListView):
     def get_queryset(self):
         self.q = self.request.GET.get("q", "")
         return Video.objects.get_search_list(self.q)
+
+    #key
+
 
 
 class ClassificationListView(AdminUserRequiredMixin, generic.ListView):
@@ -233,6 +249,7 @@ class CommentListView(AdminUserRequiredMixin, generic.ListView):
     def get_queryset(self):
         self.q = self.request.GET.get("q", "")
         return Comment.objects.filter(content__contains=self.q).order_by('-timestamp')
+
 
 
 @ajax_required

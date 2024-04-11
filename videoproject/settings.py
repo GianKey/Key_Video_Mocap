@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import time
+from django.conf import settings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,12 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'rest_framework',  # add django rest framework
     'sorl.thumbnail',
     'users',
     'chunked_upload',
     'myadmin',
     'comment',
     'video',
+    'ml.endpoints',
+    'ml.VEndpoints',
+    'ml.mlModel',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +169,13 @@ STATICFILES_DIRS = (
 # STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 AUTH_USER_MODEL = "users.User"
+CHUNKED_UPLOAD_PATH = 'chunked_uploads/%Y/%m/%d'
+def keyChunked_upload_to(instance, filename):
+    filename = os.path.join(CHUNKED_UPLOAD_PATH ,instance.upload_id + '.mp4')
+    return time.strftime(filename)
+
+
+KEY_UPLOAD_TO = getattr(settings, 'CHUNKED_UPLOAD_TO', keyChunked_upload_to)
+CHUNKED_UPLOAD_TO = KEY_UPLOAD_TO
+
+POSE_RESULT_PATH =os.path.join(BASE_DIR, 'pose_result').replace('\\', '/')
